@@ -9,38 +9,18 @@ if ! xcode-select -p &>/dev/null; then
     exit 1
 fi
 
-SDK_PATH=$(xcrun --show-sdk-path)
 APP_NAME="SunScreen"
-BUILD_DIR="build"
-APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
+APP_BUNDLE="build/$APP_NAME.app"
 CONTENTS="$APP_BUNDLE/Contents"
 
-rm -rf "$BUILD_DIR"
+echo "Compiling with Swift Package Manager..."
+swift build -c release
+
+echo "Creating app bundle..."
+rm -rf "$APP_BUNDLE"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
 
-echo "Compiling C helper..."
-cc -c Sources/brightness_helper.c \
-   -o "$BUILD_DIR/brightness_helper.o" \
-   -isysroot "$SDK_PATH"
-
-echo "Compiling Swift sources..."
-swiftc \
-    Sources/main.swift \
-    Sources/AppDelegate.swift \
-    Sources/BrightnessManager.swift \
-    Sources/BlueLightManager.swift \
-    Sources/ScheduleManager.swift \
-    Sources/ContentView.swift \
-    "$BUILD_DIR/brightness_helper.o" \
-    -import-objc-header Sources/brightness_helper.h \
-    -o "$CONTENTS/MacOS/$APP_NAME" \
-    -sdk "$SDK_PATH" \
-    -framework AppKit \
-    -framework SwiftUI \
-    -framework IOKit \
-    -framework CoreGraphics \
-    -O
-
+cp .build/release/$APP_NAME "$CONTENTS/MacOS/$APP_NAME"
 cp Resources/Info.plist "$CONTENTS/"
 cp Resources/AppIcon.icns "$CONTENTS/Resources/"
 

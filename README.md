@@ -18,31 +18,30 @@ A lightweight macOS menu bar app that automatically adjusts screen brightness an
 - macOS 14.0 (Sonoma) or later
 - Xcode Command Line Tools
 
-## Build
+## Build & Install
 
 ```bash
 git clone https://github.com/wolfromkev/SunScreen.git
 cd SunScreen
-bash build.sh
+bash install.sh
 ```
 
-This compiles the Swift and C sources, creates a signed `.app` bundle in `build/`, and prints instructions for running or installing.
+This compiles the Swift sources with SPM, creates a signed `.app` bundle, and installs it to `/Applications/`.
 
 ## Run
 
 ```bash
-open build/SunScreen.app
+open /Applications/SunScreen.app
 ```
 
-## Install
+Click the sun icon in your menu bar to open the controls.
 
-Copy to Applications for permanent use:
+## Build Only (no install)
 
 ```bash
-cp -r build/SunScreen.app /Applications/
+bash build.sh
+open build/SunScreen.app
 ```
-
-Then launch SunScreen from Spotlight or the Applications folder. Click the sun icon in your menu bar to open the controls.
 
 ## How It Works
 
@@ -52,7 +51,7 @@ Then launch SunScreen from Spotlight or the Applications folder. Click the sun i
 | Color temperature | `CGSetDisplayTransferByFormula` — adjusts per-channel gamma curves |
 | Kelvin → RGB | Tanner Helland's color temperature algorithm |
 | Darkroom mode | Red-only gamma (green and blue channels zeroed) |
-| UI | SwiftUI popover hosted in an AppKit `NSStatusItem` |
+| UI | SwiftUI view hosted in an AppKit `NSMenu` attached to `NSStatusItem` |
 | Scheduling | 60-second timer with smooth interpolation across a 60-minute transition window |
 
 ## Project Structure
@@ -60,19 +59,15 @@ Then launch SunScreen from Spotlight or the Applications folder. Click the sun i
 ```
 SunScreen/
 ├── Sources/
-│   ├── main.swift              # App entry point
-│   ├── AppDelegate.swift       # Menu bar setup, popover, wake observer
-│   ├── BrightnessManager.swift # Swift wrapper around C brightness helper
-│   ├── BlueLightManager.swift  # Kelvin → gamma conversion, darkroom mode
-│   ├── ScheduleManager.swift   # Auto scheduling, persistence, system sync
-│   ├── ContentView.swift       # SwiftUI popover UI
-│   ├── brightness_helper.c     # IOKit + DisplayServices brightness control
-│   └── brightness_helper.h     # C header for Swift bridging
+│   └── SunScreen/
+│       └── main.swift            # All app code in a single file
 ├── Resources/
-│   ├── Info.plist              # App bundle config (LSUIElement for menu bar)
-│   ├── AppIcon.icns            # App icon
-│   └── AppIcon.png             # Source icon image
-├── build.sh                    # Build script
+│   ├── Info.plist                # App bundle config (LSUIElement for menu bar)
+│   ├── AppIcon.icns              # App icon
+│   └── AppIcon.png               # Source icon image
+├── Package.swift                 # Swift Package Manager config
+├── build.sh                      # Build script
+├── install.sh                    # Build + install to /Applications
 └── README.md
 ```
 
